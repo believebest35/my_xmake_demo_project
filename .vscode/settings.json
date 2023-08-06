@@ -1,0 +1,7 @@
+{
+    "clangd.arguments": [
+        "--compile-commands-dir=.vscode",
+    ],
+    "cmake.configureOnOpen": false
+    // "xmake.debugConfigType": "codelldb",
+}
