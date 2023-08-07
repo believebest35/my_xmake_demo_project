@@ -9,6 +9,8 @@
 推荐如下的xmake文档：
 https://zhuanlan.zhihu.com/p/640701847
 
+https://www.zhihu.com/column/c_1537535487199281152
+
 ## 安装xmake
 
 参考官方文档进行xmake的安装
