@@ -121,3 +121,90 @@ xmake
 
 xmake.lua之于xmake类似cmakelists.txt之于cmake，但xmake使用了lua，没有cmake那样的晦涩艰深。
 
+假设项目的目录如下：
+
+```
+- demo
+  - include
+    - base.hpp
+  - src
+    - base
+      - base.cpp
+      - xmake.lua
+    - sandbox
+      - main.cpp
+      - xmake.lua
+  - xmake.lua
+```
+
+其中***include***暴露整个项目对外的接口（如果项目不作为第三方库，***include***也没必要出现）。
+
+对应的xmake.lua分别如下
+
+* demo/xmake.lua
+
+```
+add_rules("mode.debug", "mode.release")
+
+add_requires("fmt")
+add_includedirs("include")
+
+includes("src/base", "src/sandbox")
+```
+
+* demo/src/base/xmake.lua
+
+```
+target("base")
+    set_kind("static")
+    add_files("*.cpp")
+```
+
+* demo/src/sandbox/xmake.lua
+
+```
+add_packages("fmt")
+
+target("sandbox")
+    set_kind("binary")
+    add_files("*.cpp")
+```
+
+以上便简单描述了一个项目的各个模块如何划分。
+
+假如项目中各模块存在依赖关系，例如上例中的sandbox依赖base，则可修改xmake.lua如下
+
+* demo/xmake.lua
+
+```
+add_rules("mode.debug", "mode.release")
+```
+
+* includes("src/base", "src/sandbox")
+
+```
+demo/src/base/xmake.lua
+target("base")
+    set_kind("static")
+    add_includedirs("include", {public = true})
+    add_files("*.cpp")
+```
+
+* demo/src/sandbox/xmake.lua
+
+```
+target("sandbox")
+    set_kind("binary")
+    add_files("*.cpp")
+    add_deps("base")
+```
+
+这里使用***add_deps***显示指定依赖的target。
+
+target 设置的编译链接相关的 api，还会有一个属性（private/interface/public）。
+
+api 默认 private 属性，也就是说设置的配置仅供自己使用。interface 反过来，只能给下游依赖了自己的 target 使用。
+
+而public == private + interface，自己和下游依赖都能用。
+
+因为 base 的add_includedirs设置了public = true，所以 base 和 sandbox 内的 cpp 文件，都可以引用来自 base 的头文件 base.hpp。
